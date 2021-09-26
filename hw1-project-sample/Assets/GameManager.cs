@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -51,10 +52,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        while (true)
-        {
-            yield return PlayGame();
-        }
+        yield return PlayGame();
     }
 
     private IEnumerator PlayGame()
@@ -121,6 +119,9 @@ public class GameManager : MonoBehaviour
         {
             Destroy(t.gameObject);
         }
+        
+        PlayerPrefs.SetFloat("score", _accScoreFromStart);
+        SceneManager.LoadScene("Start", LoadSceneMode.Single);
     }
 
     private List<Tile> DestroyIfRowFull(List<Tile> tiles, int y) 
