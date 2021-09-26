@@ -11,9 +11,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Tile _tilePrefab;
 
     [SerializeField] private Text _elapsedTimeFromStartText;
+    
+    [SerializeField] private Text _accScoreFromStartText;
 
     private const int Width = 6;
     private const int Height = 10;
+    private const float TimeBeforeDestroy = 0.2f;
 
     private const int MiddleX = Width / 2;
     private const int Top = Height - 1;
@@ -22,6 +25,7 @@ public class GameManager : MonoBehaviour
     private const float MaxElapsedTimeFromStart = 60f;
 
     private float _elapsedTimeFromStart;
+    private int _accScoreFromStart;
 
     private float ElapsedTimeFromStart
     {
@@ -31,6 +35,17 @@ public class GameManager : MonoBehaviour
         {
             _elapsedTimeFromStart = value;
             _elapsedTimeFromStartText.text = _elapsedTimeFromStart.ToString("F2");
+        }
+    }
+
+    private int AccScoreFromStart
+    {
+        get => _accScoreFromStart;
+
+        set
+        {
+            _accScoreFromStart = value;
+            _accScoreFromStartText.text = _accScoreFromStart.ToString();
         }
     }
 
@@ -51,6 +66,8 @@ public class GameManager : MonoBehaviour
         ElapsedTimeFromStart = 0f;
         var elapsedTime = 0f;
 
+        AccScoreFromStart = 0;
+
         while (ElapsedTimeFromStart <= MaxElapsedTimeFromStart)
         {
             ElapsedTimeFromStart += Time.deltaTime;
@@ -70,6 +87,7 @@ public class GameManager : MonoBehaviour
             {
                 if (!MoveTileDown(tiles, tile))
                 {
+                    tiles = DestroyIfRowFull(tiles, tile.Y);
                     tile = CreateNewTile(tiles);
 
                     if (tile == null) break;
@@ -80,6 +98,7 @@ public class GameManager : MonoBehaviour
             {
                 if (!MoveTileDown(tiles, tile))
                 {
+                    tiles = DestroyIfRowFull(tiles, tile.Y);
                     tile = CreateNewTile(tiles);
 
                     if (tile == null) break;
@@ -103,6 +122,43 @@ public class GameManager : MonoBehaviour
             Destroy(t.gameObject);
         }
     }
+
+    private List<Tile> DestroyIfRowFull(List<Tile> tiles, int y) 
+    {
+        List<Tile> newTiles = tiles.Where(t => t.Y != y).ToList();
+        if (tiles.Count - newTiles.Count == Width) {
+            StartCoroutine(DestroyRowCoroutine(tiles, y));
+            StartCoroutine(DecendHigherCoroutine(tiles, y));
+
+            tiles = newTiles;
+            AccScoreFromStart += 10;
+        }
+        return tiles;
+    }
+
+    private IEnumerator DestroyRowCoroutine(List<Tile> tiles, int y)
+    {
+        List<Tile> sameRowTiles = tiles.Where(t => t.Y == y).ToList();
+
+        foreach(Tile t in sameRowTiles)
+        {
+            t.SetColor(Color.grey);
+            t.Hit();
+        }
+
+        yield return new WaitForSeconds(TimeBeforeDestroy);
+
+        sameRowTiles.ForEach(t => Destroy(t.gameObject));
+    }
+
+    private IEnumerator DecendHigherCoroutine(List<Tile> tiles, int y)
+    {
+        yield return new WaitForSeconds(TimeBeforeDestroy);
+
+        List<Tile> higherRowTiles = tiles.Where(t => t.Y > y && t.Y != y).ToList();
+        higherRowTiles.ForEach(t => t.Y--);
+    }
+
     private Tile CreateNewTile(IEnumerable<Tile> tiles)
     {
         if (tiles.Any(other => other.X == MiddleX && other.Y == Top))

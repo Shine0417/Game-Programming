@@ -71,4 +71,8 @@ public class Tile : MonoBehaviour
         }
 
     }
+
+    public void SetColor(Color c) {
+        _spriteRenderer.material.SetColor("_Color", c);
+    }
 }
