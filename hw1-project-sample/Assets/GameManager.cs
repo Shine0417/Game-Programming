@@ -14,15 +14,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Text _elapsedTimeFromStartText;
     
     [SerializeField] private Text _accScoreFromStartText;
+    
+    [SerializeField] private Text _nowSpeedText;
 
-    private const int Width = 6;
+    private const int Width = 9;
     private const int Height = 10;
     private const float TimeBeforeDestroy = 0.2f;
 
     private const int MiddleX = Width / 2;
     private const int Top = Height - 1;
 
-    private const float MaxElapsedTimePerStep = 0.3f;
+    private float MaxElapsedTimePerStep = 0.3f;
     private const float MaxElapsedTimeFromStart = 60f;
 
     private float _elapsedTimeFromStart;
@@ -68,6 +70,11 @@ public class GameManager : MonoBehaviour
 
         while (ElapsedTimeFromStart <= MaxElapsedTimeFromStart)
         {
+            if(MaxElapsedTimePerStep > 0.08f) {
+              MaxElapsedTimePerStep = 0.3f - 0.3f*ElapsedTimeFromStart/MaxElapsedTimeFromStart;
+              _nowSpeedText.text = (100*((1.0/MaxElapsedTimePerStep) - (1.0/0.3f))).ToString("F1");
+            }
+
             ElapsedTimeFromStart += Time.deltaTime;
             elapsedTime += Time.deltaTime;
 
