@@ -12,6 +12,8 @@ public class StartManager : MonoBehaviour
     [SerializeField] private Text _bestScoreSinceStartText;
     private const string introText = "PRESS SPACE TO START";
 
+    [SerializeField] private AudioSource _startGameAudioSource;
+
     private float _bestScoreSinceStart;
     private float BestScoreSinceStart
     {
@@ -30,12 +32,18 @@ public class StartManager : MonoBehaviour
         InvokeRepeating("splashText", 0.5f, 0.5f);
     }
 
-     void Update()
+    void Update()
     {
         if (Input.GetKeyDown("space"))
         {
-            SceneManager.LoadScene("Game", LoadSceneMode.Single);
+            _startGameAudioSource.Play();
+            StartCoroutine(LoadLevelAfterDelay(0.5f));
         }
+    }
+
+    IEnumerator LoadLevelAfterDelay(float delay) {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene("Game", LoadSceneMode.Single);
     }
 
     void splashText()
