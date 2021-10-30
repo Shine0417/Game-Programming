@@ -42,6 +42,8 @@ namespace Platformer.Mechanics
 
         public Bounds Bounds => collider2d.bounds;
 
+        public GameObject carried;
+
         void Awake()
         {
             health = GetComponent<Health>();
@@ -70,6 +72,20 @@ namespace Platformer.Mechanics
             }
             UpdateJumpState();
             base.Update();
+
+            int flip = spriteRenderer.flipX ? -1 : 1;
+            Vector3 v3 = carried.transform.localPosition;
+            v3.x = flip * Mathf.Abs(v3.x);
+            carried.transform.localPosition = v3;
+
+            if (Input.GetKey("p"))
+            {
+                carried.transform.parent = null;
+                carried.GetComponent<Rigidbody2D>().isKinematic = false;
+                carried.GetComponent<Collider2D>().enabled = true;
+                carried.GetComponent<Rigidbody2D>().velocity = velocity * 1.1f;
+                carried = null;
+            }
         }
 
         void UpdateJumpState()
